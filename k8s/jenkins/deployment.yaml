@@ -49,8 +49,13 @@ spec:
         - /bin/bash
         - -c
         - |
-          apt-get update && apt-get install -y docker.io curl && \
+          apt-get update && \
+          apt-get install -y docker.io curl wget libicu-dev && \
           curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash && \
+          wget https://dot.net/v1/dotnet-install.sh -O /tmp/dotnet-install.sh && \
+          chmod +x /tmp/dotnet-install.sh && \
+          /tmp/dotnet-install.sh --channel 6.0 --install-dir /usr/share/dotnet && \
+          ln -s /usr/share/dotnet/dotnet /usr/bin/dotnet && \
           exec /usr/local/bin/jenkins.sh
         volumeMounts:
         - name: jenkins-data

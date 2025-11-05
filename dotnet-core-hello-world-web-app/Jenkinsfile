@@ -1,18 +1,14 @@
 pipeline {
     agent any
     
-    parameters {
-        string(name: 'NEXUS_USERNAME', defaultValue: 'jenkins-user', description: 'Nexus kullanıcı adı')
-        password(name: 'NEXUS_PASSWORD', description: 'Nexus şifresi')
-    }
-    
     environment {
         DOCKER_REGISTRY = 'nexus-docker-registry.default.svc.cluster.local:5000'
-        IMAGE_NAME = 'hello-world'
+        IMAGE_NAME = 'dotnet-webapp'
         IMAGE_TAG = "${env.BUILD_NUMBER}"
         HELM_CHART_PATH = 'helm/webapp'
-        NEXUS_USERNAME = "${params.NEXUS_USERNAME}"
-        NEXUS_PASSWORD = "${params.NEXUS_PASSWORD}"
+        // Nexus admin kullanıcısı (test için)
+        NEXUS_USERNAME = 'admin'
+        NEXUS_PASSWORD = 'admin123'
     }
     
     stages {
@@ -66,7 +62,7 @@ pipeline {
                     echo 'Deploying to Kubernetes using Helm...'
                     sh '''
                         cd dotnet-core-hello-world-web-app
-                        helm upgrade --install hello-world ${HELM_CHART_PATH} \\
+                        helm upgrade --install dotnet-webapp ${HELM_CHART_PATH} \\
                             --set image.repository=${DOCKER_REGISTRY}/${IMAGE_NAME} \\
                             --set image.tag=${IMAGE_TAG} \\
                             --namespace default \\

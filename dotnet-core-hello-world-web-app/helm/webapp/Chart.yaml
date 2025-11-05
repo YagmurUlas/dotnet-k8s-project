@@ -1,5 +1,5 @@
 apiVersion: v2
-name: hello-world
+name: dotnet-webapp
 description: A Helm chart for Hello World .NET Core application
 type: application
 version: 0.1.0

@@ -1,7 +1,7 @@
 replicaCount: 2
 
 image:
-  repository: nexus-docker-registry.default.svc.cluster.local:5000/hello-world
+  repository: nexus-docker-registry.default.svc.cluster.local:5000/dotnet-webapp
   pullPolicy: Always
   tag: "latest"
 
@@ -22,7 +22,7 @@ ingress:
   annotations:
     kubernetes.io/ingress.class: nginx
   hosts:
-    - host: hello-world.local
+    - host: dotnet-webapp.local
       paths:
         - path: /
           pathType: Prefix

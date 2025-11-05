@@ -152,7 +152,7 @@ Aynı şekilde `nexus-password` için de bir credential oluşturun (veya tek bir
 #### Jenkins Pipeline Oluşturma
 
 1. **New Item** > **Pipeline** seçin
-2. **Item name**: `hello-world-pipeline`
+2. **Item name**: `dotnet-webapp-pipeline`
 3. **Pipeline** bölümünde:
    - **Definition**: `Pipeline script from SCM`
    - **SCM**: `Git`
@@ -200,13 +200,13 @@ Alternatif olarak, Jenkins deployment'ını güncelleyerek Docker ve Helm'i cont
 kubectl get deployments
 
 # Pod durumunu kontrol et
-kubectl get pods -l app.kubernetes.io/name=hello-world
+kubectl get pods -l app.kubernetes.io/name=dotnet-webapp
 
 # Service durumunu kontrol et
-kubectl get svc -l app.kubernetes.io/name=hello-world
+kubectl get svc -l app.kubernetes.io/name=dotnet-webapp
 
 # Uygulamaya erişim
-kubectl port-forward svc/hello-world 8080:80
+kubectl port-forward svc/dotnet-webapp 8080:80
 # Tarayıcıda: http://localhost:8080
 ```
 
@@ -258,7 +258,7 @@ Tüm kaynakları silmek için:
 
 ```bash
 # Helm release'i sil
-helm uninstall hello-world
+helm uninstall dotnet-webapp
 
 # Jenkins'i sil
 kubectl delete -f k8s/jenkins/

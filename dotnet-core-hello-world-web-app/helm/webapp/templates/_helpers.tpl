@@ -1,14 +1,14 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "hello-world.name" -}}
+{{- define "dotnet-webapp.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Create a default fully qualified app name.
 */}}
-{{- define "hello-world.fullname" -}}
+{{- define "dotnet-webapp.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -24,16 +24,16 @@ Create a default fully qualified app name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "hello-world.chart" -}}
+{{- define "dotnet-webapp.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "hello-world.labels" -}}
-helm.sh/chart: {{ include "hello-world.chart" . }}
-{{ include "hello-world.selectorLabels" . }}
+{{- define "dotnet-webapp.labels" -}}
+helm.sh/chart: {{ include "dotnet-webapp.chart" . }}
+{{ include "dotnet-webapp.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -43,17 +43,17 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "hello-world.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "hello-world.name" . }}
+{{- define "dotnet-webapp.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "dotnet-webapp.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "hello-world.serviceAccountName" -}}
+{{- define "dotnet-webapp.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "hello-world.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "dotnet-webapp.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}

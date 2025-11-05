@@ -134,7 +134,7 @@ exit
 ### Pipeline Oluştur
 
 1. **New Item** > **Pipeline**
-2. **Item name**: `hello-world-pipeline`
+2. **Item name**: `dotnet-webapp-pipeline`
 3. **Pipeline** bölümü:
    - **Definition**: `Pipeline script from SCM`
    - **SCM**: `Git`
@@ -158,10 +158,10 @@ exit
 kubectl get deployments
 
 # Pod'ları kontrol et
-kubectl get pods -l app.kubernetes.io/name=hello-world
+kubectl get pods -l app.kubernetes.io/name=dotnet-webapp
 
 # Uygulamaya erişim
-kubectl port-forward svc/hello-world 8080:80
+kubectl port-forward svc/dotnet-webapp 8080:80
 ```
 
 Tarayıcıda: http://localhost:8080 → "Hello World!" mesajını görmelisiniz.
@@ -180,7 +180,7 @@ Tarayıcıda: http://localhost:8080 → "Hello World!" mesajını görmelisiniz.
 ### GitLab Webhook
 
 1. Repository > **Settings** > **Webhooks**
-2. **URL**: `http://jenkins-ip:30080/project/hello-world-pipeline`
+2. **URL**: `http://jenkins-ip:30080/project/dotnet-webapp-pipeline`
 3. **Trigger**: `Push events`
 4. **Add webhook**
 
@@ -211,10 +211,10 @@ kubectl describe pod -l app=jenkins
 
 ```bash
 # Pod loglarını kontrol et
-kubectl logs -l app.kubernetes.io/name=hello-world
+kubectl logs -l app.kubernetes.io/name=dotnet-webapp
 
 # Pod durumunu kontrol et
-kubectl describe pod -l app.kubernetes.io/name=hello-world
+kubectl describe pod -l app.kubernetes.io/name=dotnet-webapp
 ```
 
 ## Sonraki Adımlar
