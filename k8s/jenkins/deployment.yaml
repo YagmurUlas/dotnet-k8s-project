@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jenkins
+  namespace: default
+  labels:
+    app: jenkins
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jenkins
+  template:
+    metadata:
+      labels:
+        app: jenkins
+    spec:
+      serviceAccountName: jenkins
+      initContainers:
+      - name: install-tools
+        image: docker:latest
+        command: ['sh', '-c']
+        args:
+        - |
+          apk add --no-cache curl
+          curl -L https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64 -o /tmp/docker-compose
+          chmod +x /tmp/docker-compose
+          cp /usr/local/bin/docker /tmp/docker
+          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | sh
+          cp /usr/local/bin/helm /tmp/helm
+        volumeMounts:
+        - name: tools
+          mountPath: /tmp
+      containers:
+      - name: jenkins
+        image: jenkins/jenkins:lts
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http-port
+        - containerPort: 50000
+          name: jnlp-port
+        env:
+        - name: JAVA_OPTS
+          value: "-Djenkins.install.runSetupWizard=false -Dhudson.model.DirectoryBrowserSupport.CSP= -Djenkins.model.DirectoryBrowserSupport.CSP=\"sandbox allow-scripts; default-src 'self'; script-src * 'unsafe-inline'; style-src * 'unsafe-inline';\""
+        - name: JENKINS_OPTS
+          value: "--httpPort=8080"
+        command:
+        - /bin/bash
+        - -c
+        - |
+          apt-get update && apt-get install -y docker.io curl && \
+          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash && \
+          exec /usr/local/bin/jenkins.sh
+        volumeMounts:
+        - name: jenkins-data
+          mountPath: /var/jenkins_home
+        - name: docker-sock
+          mountPath: /var/run/docker.sock
+        - name: kubectl-config
+          mountPath: /root/.kube
+        - name: tools
+          mountPath: /tmp/tools
+        securityContext:
+          runAsUser: 0
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1000m"
+          limits:
+            memory: "4Gi"
+            cpu: "2000m"
+        livenessProbe:
+          httpGet:
+            path: /login
+            port: 8080
+          initialDelaySeconds: 120
+          periodSeconds: 30
+          timeoutSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /login
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 5
+      volumes:
+      - name: jenkins-data
+        persistentVolumeClaim:
+          claimName: jenkins-data
+      - name: docker-sock
+        hostPath:
+          path: /var/run/docker.sock
+      - name: kubectl-config
+        hostPath:
+          path: /root/.kube
+          type: DirectoryOrCreate
+      - name: tools
+        emptyDir: {}
+

@@ -1,0 +1,92 @@
+pipeline {
+    agent any
+    
+    parameters {
+        string(name: 'NEXUS_USERNAME', defaultValue: 'jenkins-user', description: 'Nexus kullanıcı adı')
+        password(name: 'NEXUS_PASSWORD', description: 'Nexus şifresi')
+    }
+    
+    environment {
+        DOCKER_REGISTRY = 'nexus-docker-registry.default.svc.cluster.local:5000'
+        IMAGE_NAME = 'hello-world'
+        IMAGE_TAG = "${env.BUILD_NUMBER}"
+        HELM_CHART_PATH = 'helm/webapp'
+        NEXUS_USERNAME = "${params.NEXUS_USERNAME}"
+        NEXUS_PASSWORD = "${params.NEXUS_PASSWORD}"
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        
+        stage('Unit Tests') {
+            steps {
+                script {
+                    echo 'Running unit tests...'
+                    sh '''
+                        cd dotnet-core-hello-world-web-app
+                        dotnet test Tests/Tests.csproj --verbosity normal
+                    '''
+                }
+            }
+        }
+        
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    echo 'Building Docker image...'
+                    sh '''
+                        cd dotnet-core-hello-world-web-app
+                        docker build -t ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} .
+                        docker tag ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest
+                    '''
+                }
+            }
+        }
+        
+        stage('Push to Nexus') {
+            steps {
+                script {
+                    echo 'Pushing image to Nexus...'
+                    sh '''
+                        docker login -u ${NEXUS_USERNAME} -p ${NEXUS_PASSWORD} ${DOCKER_REGISTRY}
+                        docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}
+                        docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest
+                    '''
+                }
+            }
+        }
+        
+        stage('Deploy to Kubernetes') {
+            steps {
+                script {
+                    echo 'Deploying to Kubernetes using Helm...'
+                    sh '''
+                        cd dotnet-core-hello-world-web-app
+                        helm upgrade --install hello-world ${HELM_CHART_PATH} \\
+                            --set image.repository=${DOCKER_REGISTRY}/${IMAGE_NAME} \\
+                            --set image.tag=${IMAGE_TAG} \\
+                            --namespace default \\
+                            --create-namespace
+                    '''
+                }
+            }
+        }
+    }
+    
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed!'
+        }
+        always {
+            cleanWs()
+        }
+    }
+}
+
