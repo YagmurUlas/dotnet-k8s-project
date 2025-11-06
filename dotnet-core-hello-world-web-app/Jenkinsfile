@@ -95,7 +95,9 @@ pipeline {
                     sh '''
                         cd dotnet-core-hello-world-web-app
                         # ClusterIP kullan (DNS çözümleme sorunu için)
-                        NEXUS_IP=$(kubectl get svc nexus-docker-registry -o jsonpath='{.spec.clusterIP}')
+                        # kubectl PATH'te olmayabilir, tam path kullan
+                        KUBECTL_CMD=$(which kubectl || echo "/usr/local/bin/kubectl")
+                        NEXUS_IP=$(${KUBECTL_CMD} get svc nexus-docker-registry -o jsonpath='{.spec.clusterIP}')
                         echo "Using Nexus ClusterIP: ${NEXUS_IP}"
                         helm upgrade --install dotnet-webapp ${HELM_CHART_PATH} \\
                             --set image.repository=${NEXUS_IP}:5000/${IMAGE_NAME} \\

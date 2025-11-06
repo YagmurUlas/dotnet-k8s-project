@@ -72,6 +72,9 @@ spec:
           apt-get update && \
           apt-get install -y docker.io curl wget libicu-dev && \
           curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash && \
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && \
+          chmod +x kubectl && \
+          mv kubectl /usr/local/bin/kubectl && \
           wget https://dot.net/v1/dotnet-install.sh -O /tmp/dotnet-install.sh && \
           chmod +x /tmp/dotnet-install.sh && \
           /tmp/dotnet-install.sh --channel 6.0 --install-dir /usr/share/dotnet && \
