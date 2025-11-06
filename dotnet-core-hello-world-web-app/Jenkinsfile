@@ -4,7 +4,7 @@ pipeline {
     // Auto trigger: Polling ile (1 dakikada bir kontrol eder)
     // Git push yapıldığında en geç 1 dakika içinde pipeline çalışır
     triggers {
-        pollSCM('H/1 * * * *')  // Her 1 dakikada bir kontrol eder
+        pollSCM('*/1 * * * *')  // Her 1 dakikada bir kontrol eder
     }
     
     environment {
