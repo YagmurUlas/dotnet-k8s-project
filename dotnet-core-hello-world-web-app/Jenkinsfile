@@ -1,6 +1,12 @@
 pipeline {
     agent any
     
+    // Auto trigger: Polling ile (1 dakikada bir kontrol eder)
+    // Git push yapıldığında en geç 1 dakika içinde pipeline çalışır
+    triggers {
+        pollSCM('H/1 * * * *')  // Her 1 dakikada bir kontrol eder
+    }
+    
     environment {
         DOCKER_REGISTRY = 'nexus-docker-registry.default.svc.cluster.local:5000'
         IMAGE_NAME = 'dotnet-webapp'
@@ -88,8 +94,11 @@ pipeline {
                     echo 'Deploying to Kubernetes using Helm...'
                     sh '''
                         cd dotnet-core-hello-world-web-app
+                        # ClusterIP kullan (DNS çözümleme sorunu için)
+                        NEXUS_IP=$(kubectl get svc nexus-docker-registry -o jsonpath='{.spec.clusterIP}')
+                        echo "Using Nexus ClusterIP: ${NEXUS_IP}"
                         helm upgrade --install dotnet-webapp ${HELM_CHART_PATH} \\
-                            --set image.repository=${DOCKER_REGISTRY}/${IMAGE_NAME} \\
+                            --set image.repository=${NEXUS_IP}:5000/${IMAGE_NAME} \\
                             --set image.tag=${IMAGE_TAG} \\
                             --set image.pullPolicy=Always \\
                             --namespace default
