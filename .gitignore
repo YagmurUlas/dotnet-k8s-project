@@ -28,6 +28,9 @@ bld/
 *.kubeconfig
 *.yaml.bak
 
+# Access Info (Özel bilgiler)
+ACCESS-INFO.md
+
 # IDE
 .idea/
 .vscode/

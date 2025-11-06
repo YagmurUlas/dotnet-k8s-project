@@ -29,8 +29,7 @@ if ps -p $NEXUS_PID > /dev/null && ps -p $JENKINS_PID > /dev/null && ps -p $WEBA
     echo "Jenkins: http://localhost:30080"
     echo "Dotnet Webapp: http://localhost:8080"
     echo ""
-    echo "Port forwarding'i durdurmak için: ./scripts/stop-port-forwarding.sh"
-    echo "Veya: pkill -f 'kubectl port-forward'"
+    echo "Port forwarding'i durdurmak için: pkill -f 'kubectl port-forward'"
 else
     echo "✗ Port forwarding başlatılamadı"
     exit 1

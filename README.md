@@ -2,6 +2,11 @@
 
 Bu proje, .NET Core uygulamasını Kubernetes cluster'a otomatik olarak deploy etmek için gerekli tüm yapılandırmaları içerir.
 
+## 📚 Dokümantasyon
+
+- **[COMPLETE-GUIDE.md](COMPLETE-GUIDE.md)**: Tüm adımlar, komutlar, yapılandırmalar ve GUI işlemleri
+- **[ACCESS-INFO.md](ACCESS-INFO.md)**: Erişim bilgileri (Git'e commit edilmemeli - .gitignore'da tanımlı)
+
 ## Proje Yapısı
 
 ```
@@ -11,10 +16,9 @@ dotnet-webapp-k8s-project/
 │   ├── Jenkinsfile                     # Jenkins CI/CD pipeline
 │   └── helm/                           # Helm chart
 │       └── webapp/
-├── k8s/                                # Kubernetes deployment dosyaları
-│   ├── nexus/                          # Nexus Repository Manager
-│   └── jenkins/                        # Jenkins
-└── setup.sh                            # Kurulum scripti
+└── k8s/                                # Kubernetes deployment dosyaları
+    ├── nexus/                          # Nexus Repository Manager
+    └── jenkins/                        # Jenkins
 ```
 
 ## Gereksinimler
@@ -64,17 +68,27 @@ Cloud provider'ınızın dokümantasyonuna göre cluster oluşturun ve `kubectl`
 
 ### 2. DevOps Araçlarının Kurulumu
 
-Kurulum scriptini çalıştırın:
+Manuel olarak kurulum yapın:
 
 ```bash
-chmod +x setup.sh
-./setup.sh
+# Ingress Controller kurulumu
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+
+# Nexus kurulumu
+kubectl apply -f k8s/nexus/pvc.yaml
+kubectl apply -f k8s/nexus/deployment.yaml
+kubectl apply -f k8s/nexus/service.yaml
+kubectl apply -f k8s/nexus/ingress.yaml
+
+# Jenkins kurulumu
+kubectl apply -f k8s/jenkins/pvc.yaml
+kubectl apply -f k8s/jenkins/serviceaccount.yaml
+kubectl apply -f k8s/jenkins/deployment.yaml
+kubectl apply -f k8s/jenkins/service.yaml
+kubectl apply -f k8s/jenkins/ingress.yaml
 ```
 
-Script şunları yapacak:
-- NGINX Ingress Controller kurulumu
-- Nexus Repository Manager kurulumu
-- Jenkins kurulumu
+Detaylı kurulum adımları için `COMPLETE-GUIDE.md` dosyasına bakın.
 
 ### 3. Nexus Yapılandırması
 
@@ -152,7 +166,7 @@ Aynı şekilde `nexus-password` için de bir credential oluşturun (veya tek bir
 #### Jenkins Pipeline Oluşturma
 
 1. **New Item** > **Pipeline** seçin
-2. **Item name**: `dotnet-webapp-pipeline`
+2. **Item name**: `dotnet-webapp-pipeline-v2`
 3. **Pipeline** bölümünde:
    - **Definition**: `Pipeline script from SCM`
    - **SCM**: `Git`
@@ -183,7 +197,7 @@ curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
 Alternatif olarak, Jenkins deployment'ını güncelleyerek Docker ve Helm'i container image'ına dahil edebilirsiniz.
 
-### 5. Pipeline'ı Çalıştırma
+### 5. Pipeline'ı Çalıştırma (Manuel)
 
 1. Jenkins'te pipeline'ı seçin
 2. **Build Now** tıklayın
@@ -209,14 +223,6 @@ kubectl get svc -l app.kubernetes.io/name=dotnet-webapp
 kubectl port-forward svc/dotnet-webapp 8080:80
 # Tarayıcıda: http://localhost:8080
 ```
-
-## Otomatik Deploy
-
-Master branch'e push/merge yapıldığında pipeline otomatik olarak çalışacaktır. Jenkins'te webhook yapılandırması yapmanız gerekebilir:
-
-1. **Manage Jenkins** > **Configure System**
-2. **GitHub** veya **GitLab** plugin yapılandırması
-3. Repository ayarlarında webhook URL'i ekleyin
 
 ## Troubleshooting
 
@@ -270,11 +276,4 @@ kubectl delete -f k8s/nexus/
 kubectl delete -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
 ```
 
-## Katkıda Bulunma
-
-Bu proje bir değerlendirme projesidir. İyileştirme önerileri için issue açabilirsiniz.
-
-## Lisans
-
-Bu proje eğitim amaçlıdır.
 
