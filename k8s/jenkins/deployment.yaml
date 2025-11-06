@@ -32,6 +32,26 @@ spec:
         - name: tools
           mountPath: /tmp
       containers:
+      - name: docker-dind
+        image: docker:dind
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: docker-sock
+          mountPath: /var/run
+        env:
+        - name: DOCKER_TLS_CERTDIR
+          value: ""
+        command:
+        - dockerd-entrypoint.sh
+        - --insecure-registry=nexus-docker-registry.default.svc.cluster.local:5000
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
       - name: jenkins
         image: jenkins/jenkins:lts
         imagePullPolicy: Always
@@ -61,7 +81,7 @@ spec:
         - name: jenkins-data
           mountPath: /var/jenkins_home
         - name: docker-sock
-          mountPath: /var/run/docker.sock
+          mountPath: /var/run
         - name: kubectl-config
           mountPath: /root/.kube
         - name: tools
@@ -94,8 +114,7 @@ spec:
         persistentVolumeClaim:
           claimName: jenkins-data
       - name: docker-sock
-        hostPath:
-          path: /var/run/docker.sock
+        emptyDir: {}
       - name: kubectl-config
         hostPath:
           path: /root/.kube

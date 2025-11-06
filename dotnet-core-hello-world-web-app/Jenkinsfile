@@ -91,6 +91,7 @@ pipeline {
                         helm upgrade --install dotnet-webapp ${HELM_CHART_PATH} \\
                             --set image.repository=${DOCKER_REGISTRY}/${IMAGE_NAME} \\
                             --set image.tag=${IMAGE_TAG} \\
+                            --set image.pullPolicy=Always \\
                             --namespace default
                     '''
                 }
