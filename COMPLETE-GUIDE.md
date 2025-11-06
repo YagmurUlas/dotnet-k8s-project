@@ -76,7 +76,7 @@ Bu proje, .NET Core uygulamasının Kubernetes cluster'ında CI/CD pipeline ile 
 2. **Jenkins**: CI/CD pipeline yönetimi (Docker, Helm, .NET SDK, kubectl ile)
 3. **Nexus**: Docker image repository (Port 5000, HTTP insecure)
 4. **Kubernetes**: Uygulama deployment (Helm ile)
-5. **Ingress Controller**: External erişim sağlar
+5. **Port Forwarding**: Uygulamaya erişim için kullanılıyor (http://localhost:8080)
 
 ## 🚀 Kurulum Adımları
 
@@ -266,7 +266,7 @@ Select Recipe -> docker(hosted) -> Name: docker-registry -> Other connectors-> H
    ↓
 8. Kubernetes → Pod'ları başlatır
    ↓
-9. User → Ingress üzerinden uygulamaya erişir
+9. User → Port forwarding ile uygulamaya erişir (http://localhost:8080)
 ```
 
 ## 📝 Yapılandırma Dosyaları
@@ -357,8 +357,8 @@ kubectl port-forward svc/dotnet-webapp 8080:80
 - **Pipeline**: http://localhost:30080/job/dotnet-webapp-pipeline/
 
 ### Dotnet Webapp
-- **Application**: http://localhost:8080
-- **Ingress**: http://dotnet-webapp.local (hosts dosyasına eklemek gerekir)
+- **Application**: http://localhost:8080 (port-forwarding ile)
+- **Not**: Ingress tanımlı ancak aktif olarak port-forwarding kullanılıyor
 
 ### Nexus Yönetimi
 
@@ -379,6 +379,33 @@ kubectl port-forward svc/dotnet-webapp 8080:80
 
 ### Kubernetes Yönetimi
 
+#### Tüm Kaynakları Görüntüleme
+
+```bash
+# Tüm pod'ları listele
+kubectl get pods --all-namespaces
+
+# Tüm service'leri listele
+kubectl get svc --all-namespaces
+
+# Tüm deployment'ları listele
+kubectl get deployments --all-namespaces
+
+# Tüm ingress'leri listele
+kubectl get ingress --all-namespaces
+
+# Tüm PVC'leri listele
+kubectl get pvc --all-namespaces
+
+# Tüm namespace'leri listele
+kubectl get namespaces
+
+# Belirli bir namespace'deki tüm kaynakları görüntüle
+kubectl get all -n default
+```
+
+#### Uygulama Kaynakları
+
 ```bash
 # Pod durumunu kontrol et
 kubectl get pods -l app.kubernetes.io/name=dotnet-webapp
@@ -394,6 +421,22 @@ kubectl get svc dotnet-webapp
 
 # Image pull durumunu kontrol et
 kubectl describe pod -l app.kubernetes.io/name=dotnet-webapp | grep -i "pulled\|pulling"
+```
+
+#### Nexus ve Jenkins Kaynakları
+
+```bash
+# Nexus pod'ları
+kubectl get pods -l app=nexus
+
+# Jenkins pod'ları
+kubectl get pods -l app=jenkins
+
+# Nexus service'leri
+kubectl get svc -l app=nexus
+
+# Jenkins service'leri
+kubectl get svc -l app=jenkins
 ```
 
 ## 🐛 Troubleshooting
@@ -450,7 +493,7 @@ kubectl get nodes -o name | xargs -I {} docker exec {} cat /etc/containerd/confi
 - **Docker Image**: `nexus-docker-registry.default.svc.cluster.local:5000/dotnet-webapp`
 - **Helm Release**: `dotnet-webapp`
 - **Kubernetes Service**: `dotnet-webapp`
-- **Ingress Host**: `dotnet-webapp.local`
+- **Ingress Host**: `dotnet-webapp.local` (tanımlı ancak aktif kullanılmıyor)
 
 ### Port Numaraları
 - **Nexus UI**: 30081
