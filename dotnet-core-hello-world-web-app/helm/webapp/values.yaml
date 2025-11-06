@@ -1,8 +1,9 @@
 replicaCount: 2
 
 image:
-  repository: nexus-docker-registry.default.svc.cluster.local:5000/dotnet-webapp
-  pullPolicy: IfNotPresent
+  #repository: nexus-docker-registry.default.svc.cluster.local:5000/dotnet-webapp
+  repository: 10.96.142.13:5000/dotnet-webapp
+  pullPolicy: Always
   tag: "latest"
 
 imagePullSecrets:
